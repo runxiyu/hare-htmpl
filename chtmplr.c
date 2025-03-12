@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "tmpl.h"
+#include "chtmplr.h"
 
 int
 tp_write(struct template *tp, const char *str, size_t len)
