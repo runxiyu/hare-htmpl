@@ -8,15 +8,15 @@ TARGET = chtmpl
 
 PREFIX ?= /usr/local
 
-SRCS = template.c parse.y
-OBJS = template.o parse.o
+SRCS = chtmpl.c parse.y
+OBJS = chtmpl.o parse.o
 
 all: $(TARGET)
 
 parse.c parse.h: parse.y
 	$(YACC) $(YFLAGS) -o parse.c $<
 
-template.o: template.c parse.h
+chtmpl.o: chtmpl.c parse.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 parse.o: parse.c
