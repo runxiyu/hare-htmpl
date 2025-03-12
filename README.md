@@ -8,6 +8,11 @@ and described in
 Currently it's just the C version, I'm going to port it to hare sometime.
 The Hare version will live in this repo.
 
+The `htmplgen` program generates a Hare file from the template file.
+
+The `htmpl` module provides auxiliary functions used by the generated Hare
+code, and must be installed for the generated code to compile.
+
 ## License
 
 This inherits the ISC license from the original code. See the LICENSE file.
