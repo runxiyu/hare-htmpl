@@ -1,7 +1,0 @@
-/chtmpl
-/parse.c
-/parse.h
-*.o
-*.a
-*.so
-*.so.*
