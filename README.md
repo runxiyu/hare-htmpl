@@ -13,6 +13,13 @@ The `htmplgen` program generates a Hare file from the template file.
 The `htmpl` module provides auxiliary functions used by the generated Hare
 code, and must be installed for the generated code to compile.
 
+## Dependencies
+
+- [Hare](https://harelang.org)
+- A POSIX-compatible Yacc implementation, such as
+  [Bison](https://www.gnu.org/software/bison/)
+- A C compiler
+
 ## License
 
 This inherits the ISC license from the original code. See the LICENSE file.
