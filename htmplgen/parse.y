@@ -687,9 +687,10 @@ void dbg(void) {
 	}
 	lastline = yylval.lineno;
 
-	fprintf(fp, "#line %d ", yylval.lineno);
-	printq(file->name);
-	putc('\n', fp);
+	// fprintf(fp, "#line %d ", yylval.lineno);
+	// printq(file->name);
+	// putc('\n', fp);
+	// TODO: Removed for now because #line doesn't exist in Hare
 }
 
 // Print a string in a form appropriate for raw inclusion into a Hare program.
