@@ -5,9 +5,6 @@ This is a portable fork of the HTML templating engine used in
 and described in
 [Omar Polo's blog post](https://www.omarpolo.com/post/template.html).
 
-Currently it's just the C version, I'm going to port it to hare sometime.
-The Hare version will live in this repo.
-
 The `htmplgen` program generates a Hare file from the template file.
 
 The `htmpl` module provides auxiliary functions used by the generated Hare
