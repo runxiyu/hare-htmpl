@@ -2,14 +2,12 @@ use io;
 use memio;
 use strings;
 
-// export type template = struct {
-// 	writer: *fn(io::handle, const []u8) (size | io::error),
-// };
-
+// Writes a string to the destination.
 export fn write(h: io::handle, s: str) (size | io::error) = {
 	return io::write(h, strings::toutf8(s))?;
 };
 
+// Writes a string to the destination after HTML-escaping it.
 export fn write_escape_html(h: io::handle, s: str) (size | io::error | nomem) = {
 	let buf = memio::dynamic();
 	defer io::close(&buf)!; // TODO: Might not want to abort for syscall interruptions
