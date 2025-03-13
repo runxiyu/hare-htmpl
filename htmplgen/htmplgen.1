@@ -37,9 +37,6 @@ The options are as follows:
 .Bl -tag -width Ds
 .It Fl G
 Do not emit debug info in the generated source.
-It's disabled by default, unless
-.Nm
-is reading from standard input.
 .It Fl o Ar out
 Write output to file.
 .Ar out
@@ -53,27 +50,27 @@ encounters any error.
 .Xr htmpl 7
 .Sh AUTHORS
 .An -nosplit
-The
-.Nm
-utility was written by
-.An Omar Polo Aq Mt op@openbsd.org .
+.An Omar Polo Aq Mt op@openbsd.org
+wrote the original version in C.
+.An Runxi Yu Aq Mt me@runxiyu.org
+ported it to Hare.
 .Sh CAVEATS
 The compiler is very naive, so there are quite a few shortcomings:
 .Bl -bullet -compact
 .It
-No attempt is made to validate the C code provided inline, nor the
+No attempt is made to validate the Hare code provided inline, nor the
 validity of the arguments to many constructs.
 .It
 The generated code assumes that a variable called
-.Va tp
+.Va handle
 of type
-.Vt struct template *
+.Vt io::handle
 is in scope inside each block.
 .It
 Each block may have additional variables used for the template
 generation implicitly defined: to avoid clashes, don't name variables
 or arguments with the
-.Sq tp_
+.Sq _htmpl_
 prefix.
 .It
 Blanks are, in most cases, trimmed.
