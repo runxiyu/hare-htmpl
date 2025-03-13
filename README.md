@@ -1,6 +1,6 @@
 # hare-htmpl – A simple HTML templating engine
 
-This is a portable fork of the HTML templating engine used in
+This is a Hare port of the HTML templating engine used in
 [Got](https://got.gameoftrees.org/?action=summary&path=got.git)
 and described in
 [Omar Polo's blog post](https://www.omarpolo.com/post/template.html).
