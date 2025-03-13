@@ -10,6 +10,11 @@ The `htmplgen` program generates a Hare file from the template file.
 The `htmpl` module provides auxiliary functions used by the generated Hare
 code, and must be installed for the generated code to compile.
 
+## Repository migration notice
+
+The primary repository has been
+[migrated onto the Lindenii Project's forge](https://forge.lindenii.runxiyu.org/hare/:/repos/hare-htmpl/).
+
 ## Dependencies
 
 - [Hare](https://harelang.org)
@@ -24,12 +29,12 @@ This inherits the ISC license from the original code. See the LICENSE file.
 ## Contributing
 
 Create a branch that begins with `contrib/` and push to the
-[main repo](https://forge.runxiyu.org/hare/:/repos/hare-htmpl/)
+[main repo](https://forge.lindenii.runxiyu.org/hare/:/repos/hare-htmpl/)
 via SSH directly.
 
 ```
-git clone ssh://forge.runxiyu.org/hare/:/repos/hare-htmpl/
-cd chtmpl
+git clone ssh://forge.lindenii.runxiyu.org/hare/:/repos/hare-htmpl/
+cd hare-htmpl
 git checkout -b contrib/whatever
 # edit and commit stuff
 git push -u origin HEAD
