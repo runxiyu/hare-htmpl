@@ -46,17 +46,20 @@ The basic unit of a
 .Nm
 file is the block.
 Each block is turned into a Hare function that output its content via some
-provided functions.
+provided functions. The block must accept an argument called
+.Ar handle
+that satisfies io::handle.
+.Pp
 Here's an example of a block:
 .Bd -literal -offset indent
-{{ define tp_base(struct template *tp, const char *title) }}
+{{ define tp_base(handle: io::handle, title: str) (void | io::error | nomem) }}
 <!doctype html>
 <html>
 	<head>
 		<title>{{ title }}</title>
 	</head>
 	<body>
-		{{ render tp->tp_body(tp) }}
+		{{ render tp_body(tp) }}
 	</body>
 </html>
 {{ end }}
@@ -81,7 +84,7 @@ and
 .It Cm {{ Ic render Ar expression() Cm }}
 Executes
 .Ar expression()
-and terminate the template if it returns -1.
+and terminate the template if it returns an error.
 It's used to render (call) another template.
 .It Cm {{ Ic printf Ar fmt , Ar arguments ... Cm }}
 Outputs the string that would be produced by calling
@@ -98,8 +101,6 @@ can be provided zero or more times,
 only zero or one time and always for last.
 .It Cm {{ Ic for Ar ... ; Ar ... ; Ar ... Cm }} Ar ... Cm {{ Ic end Cm }}
 Looping construct similar to the Hare for loop.
-.It Cm {{ Ic tailq-foreach Ar var head fieldname Cm }} Ar .. Cm {{ Ic end Cm }}
-Looping construct similar to the queue.h macro TAILQ_FOREACH.
 .It Cm {{ Ic while Ar ... Cm }} Ar ... Cm {{ Ic end Cm }}
 Looping construct similar to the Hare for loop with one condition argument only.
 .It Cm {{ Ar expression Cm \&| Ic unsafe Cm }}
@@ -113,7 +114,7 @@ escaped in a way that can be made part of an URL.
 .It Cm {{ Ar expression Cm }}
 Output
 .Ar expression
-with the default escaping.
+with the default HTML escaping.
 .El
 .Sh SEE ALSO
 .Xr htmplgen 1
