@@ -16,21 +16,19 @@
 .Dt TEMPLATE 7
 .Os
 .Sh NAME
-.Nm chtmpl
+.Nm htmpl
 .Nd templating language
 .Sh DESCRIPTION
 .Nm
-is a language used to define programs that output data in some way.
+is a language used to define programs that output HTML.
 These programs are called
 .Dq templates .
 A
 .Nm
 file is assumed to be compiled using the
-.Xr chtmpl 1
-utility into C code, to be further compiled as part of a bigger
+.Xr htmplgen 1
+utility into Hare code, to be further compiled as part of a bigger
 application.
-The language itself is format-agnostic and can thus be used to produce
-various type of outputs.
 .Pp
 There are two special sequences:
 .Bl -tag -width 9m
@@ -39,7 +37,7 @@ used for
 .Nm
 special syntax.
 .It Cm {! Ar ... Cm !}
-used to include literal C code.
+used to include literal Hare code.
 This is the only special syntax permitted as top-level, except for block
 definition and includes.
 .El
@@ -47,7 +45,7 @@ definition and includes.
 The basic unit of a
 .Nm
 file is the block.
-Each block is turned into a C function that output its content via some
+Each block is turned into a Hare function that output its content via some
 provided functions.
 Here's an example of a block:
 .Bd -literal -offset indent
@@ -99,11 +97,11 @@ can be provided zero or more times,
 .Ic else
 only zero or one time and always for last.
 .It Cm {{ Ic for Ar ... ; Ar ... ; Ar ... Cm }} Ar ... Cm {{ Ic end Cm }}
-Looping construct similar to the C for loop.
+Looping construct similar to the Hare for loop.
 .It Cm {{ Ic tailq-foreach Ar var head fieldname Cm }} Ar .. Cm {{ Ic end Cm }}
 Looping construct similar to the queue.h macro TAILQ_FOREACH.
 .It Cm {{ Ic while Ar ... Cm }} Ar ... Cm {{ Ic end Cm }}
-Looping construct similar to the C while loop.
+Looping construct similar to the Hare for loop with one condition argument only.
 .It Cm {{ Ar expression Cm \&| Ic unsafe Cm }}
 Output
 .Ar expression
@@ -118,10 +116,9 @@ Output
 with the default escaping.
 .El
 .Sh SEE ALSO
-.Xr chtmpl 1
+.Xr htmplgen 1
 .Sh AUTHORS
-.An -nosplit
-The
-.Nm
-reference was written by
-.An Omar Polo Aq Mt op@openbsd.org .
+.An Omar Polo Aq Mt op@openbsd.org
+wrote the original program.
+.An Runxi Yu Aq Mt op@openbsd.org
+ported it to Hare.

@@ -48,7 +48,7 @@ main(int argc, char **argv)
 			break;
 		default:
 			if (argc == 0)
-				usage("chtmpl");
+				usage("htmplgen");
 			else
 				usage(argv[0]);
 		}
