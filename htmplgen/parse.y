@@ -1,9 +1,10 @@
 /*
+ * Copyright (c) 2025 Runxi Yu <me@runxiyu.org>
  * Copyright (c) 2022 Omar Polo <op@openbsd.org>
  * Copyright (c) 2007-2016 Reyk Floeter <reyk@openbsd.org>
- * Copyright (c) 2004, 2005 Esben Norby <norby@openbsd.org>
+ * Copyright (c) 2004-2005 Esben Norby <norby@openbsd.org>
  * Copyright (c) 2004 Ryan McBride <mcbride@openbsd.org>
- * Copyright (c) 2002, 2003, 2004 Henning Brauer <henning@openbsd.org>
+ * Copyright (c) 2002-2004 Henning Brauer <henning@openbsd.org>
  * Copyright (c) 2001 Markus Friedl.  All rights reserved.
  * Copyright (c) 2001 Daniel Hartmeier.  All rights reserved.
  * Copyright (c) 2001 Theo de Raadt.  All rights reserved.
@@ -139,35 +140,24 @@ verbatims	: /* empty */
 
 raw		: nstring {
 			dbg();
-			fprintf(fp, "if ((tp_ret = tp_write(tp, ");
+			fprintf(fp, "htmpl::write(handle, ");
 			printq($1);
-			fprintf(fp, ", %zu)) == -1) goto err;\n",
-			    strlen($1));
-
+			fprintf(fp, ")?;\n");
 			free($1);
 		}
 		;
 
 block		: define body end {
-			fputs("err:\n", fp);
-			fputs("return tp_ret;\n", fp);
-			fputs("}\n", fp);
-			in_define = 0;
-		}
-		| define body finally end {
-			fputs("return tp_ret;\n", fp);
-			fputs("}\n", fp);
+			fputs("};\n", fp);
 			in_define = 0;
 		}
 		;
 
-define		: '{' DEFINE string '}' {
+define		: '{' DEFINE string '}' { // TODO: Hare return
 			in_define = 1;
 
 			dbg();
-			fprintf(fp, "int\n%s\n{\n", $3);
-			fputs("int tp_ret = 0;\n", fp);
-
+			fprintf(fp, "fn %s = {\n", $3);
 			free($3);
 		}
 		;
@@ -180,50 +170,28 @@ body		: /* empty */
 
 special		: '{' RENDER string '}' {
 			dbg();
-			fprintf(fp, "if ((tp_ret = %s) == -1) goto err;\n",
-			    $3);
+			fprintf(fp, "%s?;\n", $3);
 			free($3);
 		}
 		| printf
-		| if body endif			{ fputs("}\n", fp); }
+		| if body endif			{ fputs("};\n", fp); }
 		| loop
-		| '{' string '|' UNSAFE '}' {
-			dbg();
-			fprintf(fp,
-			    "if ((tp_ret = tp_writes(tp, %s)) == -1)\n",
-			    $2);
-			fputs("goto err;\n", fp);
-			free($2);
-		}
-		| '{' string '|' URLESCAPE '}' {
-			dbg();
-			fprintf(fp,
-			    "if ((tp_ret = tp_urlescape(tp, %s)) == -1)\n",
-			    $2);
-			fputs("goto err;\n", fp);
-			free($2);
-		}
 		| '{' string '}' {
 			dbg();
 			fprintf(fp,
-			    "if ((tp_ret = tp_htmlescape(tp, %s)) == -1)\n",
-			    $2);
-			fputs("goto err;\n", fp);
+			    "htmpl::write_escape_html(handle, %s)?;\n",
+			    $2); // TODO: quoting issues
 			free($2);
 		}
 		;
 
 printf		: '{' PRINTF {
 			dbg();
-			fprintf(fp, "if (asprintf(&tp->tp_tmp, ");
+			fputs("let _htmpl_tmp: str = fmt::asprintf(", fp);
 		} printfargs '}' {
-			fputs(") == -1)\n", fp);
-			fputs("goto err;\n", fp);
-			fputs("if ((tp_ret = tp_htmlescape(tp, tp->tp_tmp)) "
-			    "== -1)\n", fp);
-			fputs("goto err;\n", fp);
-			fputs("free(tp->tp_tmp);\n", fp);
-			fputs("tp->tp_tmp = NULL;\n", fp);
+			fputs(");\n", fp);
+			fputs("defer free(_htmpl_tmp);", fp);
+			fputs("htmpl::write_escape_html(handle, _htmpl_tmp)?;\n", fp);
 		}
 		;
 
@@ -263,7 +231,7 @@ loop		: '{' FOR stringy '}' {
 			fprintf(fp, "for (%s) {\n", $3);
 			free($3);
 		} body end {
-			fputs("}\n", fp);
+			fputs("};\n", fp);
 		}
 		| '{' TQFOREACH STRING STRING STRING '}' {
 			fprintf(fp, "TAILQ_FOREACH(%s, %s, %s) {\n",
@@ -272,23 +240,17 @@ loop		: '{' FOR stringy '}' {
 			free($4);
 			free($5);
 		} body end {
-			fputs("}\n", fp);
+			fputs("};\n", fp);
 		}
 		| '{' WHILE stringy '}' {
 			fprintf(fp, "while (%s) {\n", $3);
 			free($3);
 		} body end {
-			fputs("}\n", fp);
+			fputs("};\n", fp);
 		}
 		;
 
 end		: '{' END '}'
-		;
-
-finally		: '{' FINALLY '}' {
-			dbg();
-			fputs("err:\n", fp);
-		} verbatims
 		;
 
 nstring	:	STRING nstring {
@@ -316,7 +278,7 @@ stringy		: STRING
 			free($1);
 			free($2);
 		}
-		| '|' stringy {
+		| '|' stringy { // TODO: what
 			if (asprintf(&$$, "|%s", $2) == -1)
 				err(1, "asprintf");
 			free($2);
@@ -360,7 +322,6 @@ lookup(char *s)
 		{ "define",		DEFINE },
 		{ "else",		ELSE },
 		{ "end",		END },
-		{ "finally",		FINALLY },
 		{ "for",		FOR },
 		{ "if",			IF },
 		{ "include",		INCLUDE },
@@ -620,20 +581,12 @@ newblock:
 		return (STRING);
 	}
 
-	if (c == '|')
-		return (c);
-
 	do {
 		if (!quote && isspace((unsigned char)c))
 			break;
 
 		if (c == '"')
 			quote = !quote;
-
-		if (!quote && c == '|') {
-			lungetc(c);
-			break;
-		}
 
 		if (ending) {
 			if (c == '}') {
@@ -710,9 +663,7 @@ popfile(void)
 	return (file ? 0 : EOF);
 }
 
-int
-parse(FILE *outfile, const char *filename)
-{
+int parse(FILE *outfile, const char *filename) {
 	fp = outfile;
 
 	if ((file = pushfile(filename, 0)) == 0)
@@ -726,9 +677,7 @@ parse(FILE *outfile, const char *filename)
 	return (errors ? -1 : 0);
 }
 
-void
-dbg(void)
-{
+void dbg(void) {
 	if (nodebug)
 		return;
 
@@ -743,9 +692,8 @@ dbg(void)
 	putc('\n', fp);
 }
 
-void
-printq(const char *str)
-{
+// Print a string in a form appropriate for raw inclusion into a Hare program.
+void printq(const char *str) {
 	putc('"', fp);
 	for (; *str; ++str) {
 		if (*str == '"')

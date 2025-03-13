@@ -63,6 +63,9 @@ main(int argc, char **argv)
 		if (parse(fp, "/dev/stdin") == -1)
 			goto err;
 	} else {
+		fputs("use fmt;\n", fp);
+		fputs("use io;\n", fp);
+		fputs("use htmpl;\n", fp);
 		for (i = 0; i < argc; ++i)
 			if (parse(fp, argv[i]) == -1)
 				goto err;
