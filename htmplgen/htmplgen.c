@@ -20,11 +20,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int	 parse(FILE *, const char *);
+int parse(FILE *, const char *);
 
-int	 nodebug;
+int nodebug;
 
-void usage(char *progname)
+void
+usage(char *progname)
 {
 	fprintf(stderr, "usage: %s [-G] [-o out] [file ...]\n", progname);
 	exit(1);
@@ -33,9 +34,9 @@ void usage(char *progname)
 int
 main(int argc, char **argv)
 {
-	FILE		*fp = stdout;
-	const char	*out = NULL;
-	int		 ch, i;
+	FILE *fp = stdout;
+	const char *out = NULL;
+	int ch, i;
 
 	while ((ch = getopt(argc, argv, "Go:")) != -1) {
 		switch (ch) {
@@ -75,12 +76,12 @@ main(int argc, char **argv)
 		goto err;
 	}
 
-	return (0);
+	return 0;
 
 err:
 	if (fp)
 		fclose(fp);
 	if (out && unlink(out) == -1)
 		err(1, "unlink %s", out);
-	return (1);
+	return 1;
 }
