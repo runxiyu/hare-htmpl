@@ -10,6 +10,12 @@ The `htmplgen` program generates a Hare file from the template file.
 The `htmpl` module provides auxiliary functions used by the generated Hare
 code, and must be installed for the generated code to compile.
 
+Each template is presented as a function that accepts an `io::handle` and
+other user-defined parameters, if any. The template writes to that
+`io::handle`; this allows for a variety of output backends (i.e. you
+could use a `memio`/`bufio` stream, or write to an actual
+file/socket/pipe socket, etc.)
+
 ## Repository migration notice
 
 The primary repository has been
