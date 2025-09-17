@@ -28,6 +28,11 @@ The primary repository has been
   [Bison](https://www.gnu.org/software/bison/)
 - A C compiler
 
+## Dependencies for the example program
+
+- [hare-http](https://git.sr.ht/~sircmpwn/hare-http)
+- [hare-ev](https://git.sr.ht/~sircmpwn/hare-ev)
+
 ## License
 
 This inherits the ISC license from the original code. See the LICENSE file.
