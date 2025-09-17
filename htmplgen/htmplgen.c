@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2025 Runxi Yu <https://runxiyu.org>
- * Copyright (c) 2022 Omar Polo <op@openbsd.org>
+ * Copyright (c) 2024-2025 Runxi Yu <https://runxiyu.org>
+ * Copyright (c) 2022-2024 Omar Polo <op@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
