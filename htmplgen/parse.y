@@ -90,16 +90,16 @@ typedef struct {
 %token	DEFINE ELSE END ERROR FINALLY FOR IF INCLUDE PRINTF
 %token	RENDER TQFOREACH UNSAFE URLESCAPE WHILE
 %token	<v.string>	STRING
-%type	<v.string>	string nstring
+%type	<v.string>	string
 %type	<v.string>	stringy
 
 %%
 
-grammar		: /* empty */
+grammar		: %empty
 		| grammar include
 		| grammar verbatim
 		| grammar block
-		| grammar error		{ file->errors++; }
+		| grammar error			{ file->errors++; }
 		;
 
 include		: INCLUDE STRING {
@@ -124,7 +124,7 @@ verbatim	: '!' verbatim1 '!' {
 		}
 		;
 
-verbatim1	: /* empty */
+verbatim1	: %empty
 		| verbatim1 STRING {
 			if (*$2 != '\0') {
 				dbg();
@@ -134,11 +134,7 @@ verbatim1	: /* empty */
 		}
 		;
 
-verbatims	: /* empty */
-		| verbatims verbatim
-		;
-
-raw		: nstring {
+raw		: STRING {
 			dbg();
 			fprintf(fp, "htmpl::write(handle, ");
 			printq($1);
@@ -153,7 +149,7 @@ block		: define body end {
 		}
 		;
 
-define		: '{' DEFINE string '}' { // TODO: Hare return
+define		: '{' DEFINE string '}' { /* TODO: Hare return */
 			in_define = 1;
 
 			dbg();
@@ -162,7 +158,7 @@ define		: '{' DEFINE string '}' { // TODO: Hare return
 		}
 		;
 
-body		: /* empty */
+body		: %empty
 		| body verbatim
 		| body raw
 		| body special
@@ -180,7 +176,21 @@ special		: '{' RENDER string '}' {
 			dbg();
 			fprintf(fp,
 			    "htmpl::write_escape_html(handle, %s)?;\n",
-			    $2); // TODO: quoting issues
+			    $2); /* TODO: quoting issues */
+			free($2);
+		}
+		| '{' string '|' UNSAFE '}' {
+			dbg();
+			fprintf(fp,
+			    "htmpl::write(handle, %s)?;\n",
+			    $2);
+			free($2);
+		}
+		| '{' string '|' URLESCAPE '}' {
+			dbg();
+			fprintf(fp,
+			    "htmpl::write_escape_url(handle, %s)?;\n",
+			    $2);
 			free($2);
 		}
 		;
@@ -195,7 +205,7 @@ printf		: '{' PRINTF {
 		}
 		;
 
-printfargs	: /* empty */
+printfargs	: %empty
 		| printfargs STRING {
 			fprintf(fp, " %s", $2);
 			free($2);
@@ -253,15 +263,6 @@ loop		: '{' FOR stringy '}' {
 end		: '{' END '}'
 		;
 
-nstring	:	STRING nstring {
-			if (asprintf(&$$, "%s%s", $1, $2) == -1)
-				err(1, "asprintf");
-			free($1);
-			free($2);
-		}
-		| STRING
-		;
-
 string		: STRING string {
 			if (asprintf(&$$, "%s %s", $1, $2) == -1)
 				err(1, "asprintf");
@@ -276,11 +277,6 @@ stringy		: STRING
 			if (asprintf(&$$, "%s %s", $1, $2) == -1)
 				err(1, "asprintf");
 			free($1);
-			free($2);
-		}
-		| '|' stringy { // TODO: what
-			if (asprintf(&$$, "|%s", $2) == -1)
-				err(1, "asprintf");
 			free($2);
 		}
 		;
@@ -693,7 +689,7 @@ void dbg(void) {
 	// TODO: Removed for now because #line doesn't exist in Hare
 }
 
-// Print a string in a form appropriate for raw inclusion into a Hare program.
+/* Print a string in a form appropriate for raw inclusion into a Hare program. */
 void printq(const char *str) {
 	putc('"', fp);
 	for (; *str; ++str) {
