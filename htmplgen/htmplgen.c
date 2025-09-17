@@ -24,15 +24,13 @@ int parse(FILE *, const char *);
 
 int nodebug;
 
-void
-usage(char *progname)
+void usage(char *progname)
 {
 	fprintf(stderr, "usage: %s [-G] [-o out] [file ...]\n", progname);
 	exit(1);
 }
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	FILE *fp = stdout;
 	const char *out = NULL;
@@ -81,7 +79,7 @@ main(int argc, char **argv)
 
 	return 0;
 
-err:
+ err:
 	if (fp)
 		fclose(fp);
 	if (out && unlink(out) == -1)

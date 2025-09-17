@@ -39,59 +39,59 @@
 #define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
 #endif
 
-TAILQ_HEAD(files, file)		 files = TAILQ_HEAD_INITIALIZER(files);
+TAILQ_HEAD(files, file) files = TAILQ_HEAD_INITIALIZER(files);
 static struct file {
-	TAILQ_ENTRY(file)	 entry;
-	FILE			*stream;
-	char			*name;
-	size_t			 ungetpos;
-	size_t			 ungetsize;
-	unsigned char		*ungetbuf;
-	int			 eof_reached;
-	int			 lineno;
-	int			 errors;
+	TAILQ_ENTRY(file) entry;
+	FILE *stream;
+	char *name;
+	size_t ungetpos;
+	size_t ungetsize;
+	unsigned char *ungetbuf;
+	int eof_reached;
+	int lineno;
+	int errors;
 } *file, *topfile;
-int		 parse(FILE *, const char *);
-struct file	*pushfile(const char *, int);
-int		 popfile(void);
-int		 yyparse(void);
-int		 yylex(void);
-int		 yyerror(const char *, ...)
-    __attribute__((__format__ (printf, 1, 2)))
-    __attribute__((__nonnull__ (1)));
-int		 kw_cmp(const void *, const void *);
-int		 lookup(char *);
-int		 igetc(void);
-int		 lgetc(int);
-void		 lungetc(int);
-int		 findeol(void);
+int parse(FILE *, const char *);
+struct file *pushfile(const char *, int);
+int popfile(void);
+int yyparse(void);
+int yylex(void);
+int yyerror(const char *, ...)
+	__attribute__((__format__ (printf, 1, 2)))
+	__attribute__((__nonnull__ (1)));
+int kw_cmp(const void *, const void *);
+int lookup(char *);
+int igetc(void);
+int lgetc(int);
+void lungetc(int);
+int findeol(void);
 
-void		 dbg(void);
-void		 printq(const char *);
+void dbg(void);
+void printq(const char *);
 
-extern int	 nodebug;
+extern int nodebug;
 
-static FILE	*fp;
+static FILE *fp;
 
-static int	 block;
-static int	 in_define;
-static int	 errors;
-static int	 lastline = -1;
+static int block;
+static int in_define;
+static int errors;
+static int lastline = -1;
 
 typedef struct {
 	union {
-		char		*string;
+		char *string;
 	} v;
 	int lineno;
 } YYSTYPE;
 
 %}
 
-%token	DEFINE ELSE END ERROR FINALLY FOR IF INCLUDE PRINTF
-%token	RENDER TQFOREACH UNSAFE URLESCAPE WHILE
-%token	<v.string>	STRING
-%type	<v.string>	string
-%type	<v.string>	stringy
+%token DEFINE ELSE END ERROR FINALLY FOR IF INCLUDE PRINTF
+%token RENDER TQFOREACH UNSAFE URLESCAPE WHILE
+%token <v.string> STRING
+%type <v.string> string
+%type <v.string> stringy
 
 %%
 
@@ -103,7 +103,7 @@ grammar		: %empty
 		;
 
 include		: INCLUDE STRING {
-			struct file	*nfile;
+			struct file *nfile;
 
 			if ((nfile = pushfile($2, 0)) == NULL) {
 				yyerror("failed to include file %s", $2);
@@ -245,7 +245,7 @@ loop		: '{' FOR stringy '}' {
 		}
 		| '{' TQFOREACH STRING STRING STRING '}' {
 			fprintf(fp, "TAILQ_FOREACH(%s, %s, %s) {\n",
-			    $3, $4, $5);
+				$3, $4, $5);
 			free($3);
 			free($4);
 			free($5);
@@ -284,15 +284,14 @@ stringy		: STRING
 %%
 
 struct keywords {
-	const char	*k_name;
-	int		 k_val;
+	const char *k_name;
+	int k_val;
 };
 
-int
-yyerror(const char *fmt, ...)
+int yyerror(const char *fmt, ...)
 {
-	va_list	 ap;
-	char	*msg;
+	va_list ap;
+	char *msg;
 
 	file->errors++;
 	va_start(ap, fmt);
@@ -304,34 +303,31 @@ yyerror(const char *fmt, ...)
 	return (0);
 }
 
-int
-kw_cmp(const void *k, const void *e)
+int kw_cmp(const void *k, const void *e)
 {
 	return (strcmp(k, ((const struct keywords *)e)->k_name));
 }
 
-int
-lookup(char *s)
+int lookup(char *s)
 {
 	/* this has to be sorted always */
 	static const struct keywords keywords[] = {
-		{ "define",		DEFINE },
-		{ "else",		ELSE },
-		{ "end",		END },
-		{ "for",		FOR },
-		{ "if",			IF },
-		{ "include",		INCLUDE },
-		{ "printf",		PRINTF },
-		{ "render",		RENDER },
-		{ "tailq-foreach",	TQFOREACH },
-		{ "unsafe",		UNSAFE },
-		{ "urlescape",		URLESCAPE },
-		{ "while",		WHILE },
+		{ "define", DEFINE },
+		{ "else", ELSE },
+		{ "end", END },
+		{ "for", FOR },
+		{ "if", IF },
+		{ "include", INCLUDE },
+		{ "printf", PRINTF },
+		{ "render", RENDER },
+		{ "tailq-foreach", TQFOREACH },
+		{ "unsafe", UNSAFE },
+		{ "urlescape", URLESCAPE },
+		{ "while", WHILE },
 	};
-	const struct keywords	*p;
+	const struct keywords *p;
 
-	p = bsearch(s, keywords, nitems(keywords), sizeof(keywords[0]),
-	    kw_cmp);
+	p = bsearch(s, keywords, nitems(keywords), sizeof(keywords[0]), kw_cmp);
 
 	if (p)
 		return (p->k_val);
@@ -342,12 +338,11 @@ lookup(char *s)
 #define START_EXPAND	1
 #define DONE_EXPAND	2
 
-static int	expanding;
+static int expanding;
 
-int
-igetc(void)
+int igetc(void)
 {
-	int	c;
+	int c;
 
 	while (1) {
 		if (file->ungetpos > 0)
@@ -365,15 +360,14 @@ igetc(void)
 	return (c);
 }
 
-int
-lgetc(int quotec)
+int lgetc(int quotec)
 {
-	int		c;
+	int c;
 
 	if (quotec) {
 		if ((c = igetc()) == EOF) {
 			yyerror("reached end of filewhile parsing "
-			    "quoted string");
+				"quoted string");
 			if (file == topfile || popfile() == EOF)
 				return (EOF);
 			return (quotec);
@@ -386,7 +380,7 @@ lgetc(int quotec)
 		/* Compress blanks to a sigle space. */
 		do {
 			c = getc(file->stream);
-		} while (c == '\t'  || c == ' ');
+		} while (c == '\t' || c == ' ');
 		ungetc(c, file->stream);
 		c = ' ';
 	}
@@ -410,8 +404,7 @@ lgetc(int quotec)
 	return (c);
 }
 
-void
-lungetc(int c)
+void lungetc(int c)
 {
 	if (c == EOF)
 		return;
@@ -426,10 +419,9 @@ lungetc(int c)
 	file->ungetbuf[file->ungetpos++] = c;
 }
 
-int
-findeol(void)
+int findeol(void)
 {
-	int	c;
+	int c;
 
 	/* skip to either EOF or the first real EOL */
 	while (1) {
@@ -444,16 +436,15 @@ findeol(void)
 	return (ERROR);
 }
 
-int
-yylex(void)
+int yylex(void)
 {
-	char		 buf[8096];
-	char		*p = buf;
-	int		 c;
-	int		 token;
-	int		 starting = 0;
-	int		 ending = 0;
-	int		 quote = 0;
+	char buf[8096];
+	char *p = buf;
+	int c;
+	int token;
+	int starting = 0;
+	int ending = 0;
+	int quote = 0;
 
 	if (!in_define && block == 0) {
 		while ((c = lgetc(0)) != '{' && c != EOF) {
@@ -618,10 +609,9 @@ newblock:
 	return (token);
 }
 
-struct file *
-pushfile(const char *name, int secret)
+struct file *pushfile(const char *name, int secret)
 {
-	struct file	*nfile;
+	struct file *nfile;
 
 	if ((nfile = calloc(1, sizeof(*nfile))) == NULL)
 		err(1, "calloc");
@@ -642,10 +632,9 @@ pushfile(const char *name, int secret)
 	return (nfile);
 }
 
-int
-popfile(void)
+int popfile(void)
 {
-	struct file	*prev;
+	struct file *prev;
 
 	if ((prev = TAILQ_PREV(file, files, entry)) != NULL)
 		prev->errors += file->errors;
@@ -659,7 +648,8 @@ popfile(void)
 	return (file ? 0 : EOF);
 }
 
-int parse(FILE *outfile, const char *filename) {
+int parse(FILE *outfile, const char *filename)
+{
 	fp = outfile;
 
 	if ((file = pushfile(filename, 0)) == 0)
@@ -673,7 +663,8 @@ int parse(FILE *outfile, const char *filename) {
 	return (errors ? -1 : 0);
 }
 
-void dbg(void) {
+void dbg(void)
+{
 	if (nodebug)
 		return;
 
@@ -690,7 +681,8 @@ void dbg(void) {
 }
 
 /* Print a string in a form appropriate for raw inclusion into a Hare program. */
-void printq(const char *str) {
+void printq(const char *str)
+{
 	putc('"', fp);
 	for (; *str; ++str) {
 		if (*str == '"')
